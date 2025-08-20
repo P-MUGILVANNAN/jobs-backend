@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please add your name"],
+      required: function () {
+        return this.provider === "local"; // name required only for local signup
+      },
     },
     email: {
       type: String,
@@ -21,7 +23,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please add a password"],
+      required: function () {
+        return this.provider === "local"; // password only required for local
+      },
       minlength: 6,
       select: false,
     },
@@ -30,13 +34,27 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    googleId: {
+      type: String, // Firebase UID / Google unique ID
+      required: function () {
+        return this.provider === "google";
+      },
+    },
+    avatar: {
+      type: String, // Google profile picture URL
+    },
   },
   { timestamps: true }
 );
 
-// 🔹 Hash password before saving
+// 🔹 Hash password only if local signup
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (!this.isModified("password") || this.provider !== "local") {
     return next();
   }
   const salt = await bcrypt.genSalt(10);
@@ -52,7 +70,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 // 🔹 Generate JWT token
 userSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(
-    { id: this._id, role: this.role },
+    { id: this._id, role: this.role, provider: this.provider },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
