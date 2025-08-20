@@ -7,6 +7,7 @@ const connectDb = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const jobRoutes = require("./routes/jobRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,7 @@ app.get("/",(req,res)=>{
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/jobs", jobRoutes);
 
