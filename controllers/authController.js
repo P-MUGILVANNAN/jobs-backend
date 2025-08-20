@@ -38,7 +38,6 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // find only local users
     const user = await User.findOne({ email, provider: "local" }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -75,7 +74,6 @@ const googleAuth = async (req, res) => {
     let user = await User.findOne({ email, provider: "google" });
 
     if (!user) {
-      // create new google user
       user = await User.create({
         name: name || "Google User",
         email,

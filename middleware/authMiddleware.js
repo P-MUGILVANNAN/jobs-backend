@@ -3,7 +3,7 @@ const User = require("../models/User");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// Protect routes
+// ✅ Middleware to protect routes (any authenticated user)
 const protect = async (req, res, next) => {
   let token;
 
@@ -24,7 +24,7 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: "User not found" });
       }
 
-      next();
+      next(); // ✅ authenticated user
     } catch (error) {
       console.error(error);
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -36,7 +36,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Admin only middleware
+// ✅ Admin-only middleware
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
@@ -45,4 +45,13 @@ const adminOnly = (req, res, next) => {
   }
 };
 
-module.exports = { protect, adminOnly };
+// ✅ User-only middleware (optional, if you want role check)
+const userOnly = (req, res, next) => {
+  if (req.user && req.user.role === "user") {
+    next();
+  } else {
+    return res.status(403).json({ message: "User access only" });
+  }
+};
+
+module.exports = { protect, adminOnly, userOnly };

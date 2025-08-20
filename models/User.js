@@ -6,10 +6,11 @@ dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
+    // 🔹 Basic Account Info
     name: {
       type: String,
       required: function () {
-        return this.provider === "local"; // name required only for local signup
+        return this.provider === "local"; // required only for local signup
       },
     },
     email: {
@@ -24,15 +25,15 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider === "local"; // password only required for local
+        return this.provider === "local"; // required only for local signup
       },
       minlength: 6,
       select: false,
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["jobseeker", "admin"],
+      default: "jobseeker",
     },
     provider: {
       type: String,
@@ -46,7 +47,67 @@ const userSchema = new mongoose.Schema(
       },
     },
     avatar: {
-      type: String, // Google profile picture URL
+      type: String, // Google/local profile picture
+    },
+
+    // 🔹 Extended Profile Section
+    profileImage: {
+      type: String, // custom profile image
+    },
+    coverImage: {
+      type: String, // cover banner image
+    },
+    about: {
+      type: String, // short bio / summary
+    },
+    phone: {
+      type: String,
+    },
+    location: {
+      type: String,
+    },
+    skills: [String],
+    experience: {
+      type: String, // e.g. "2-4 years"
+    },
+
+    // 🔹 Education (multiple entries allowed)
+    education: [
+      {
+        level: { type: String }, // e.g. "10th", "12th", "B.Sc", "MCA"
+        institution: { type: String },
+        startYear: { type: String },
+        endYear: { type: String },
+        grade: { type: String }, // optional
+      },
+    ],
+
+    // 🔹 Projects (multiple projects allowed)
+    projects: [
+      {
+        projectName: { type: String, required: true },
+        description: { type: String },
+        liveLink: { type: String },
+        githubLink: { type: String },
+        duration: { type: String }, // e.g. "Jan 2023 - Mar 2023"
+      },
+    ],
+
+    // 🔹 Resume & Job Applications
+    resume: {
+      type: String, // store file path or cloud URL
+    },
+    appliedJobs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Job",
+      },
+    ],
+
+    // 🔹 Admin flagging
+    isSuspicious: {
+      type: Boolean,
+      default: false, // admin can flag/delete later
     },
   },
   { timestamps: true }
