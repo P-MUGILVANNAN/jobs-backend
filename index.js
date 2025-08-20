@@ -10,6 +10,7 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const adminApplicationRoutes = require("./routes/adminApplicationRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
+const { swaggerUi, swaggerSpec } = require("./config/swagger");
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,9 @@ connectDb();
 app.get("/",(req,res)=>{
     res.send("Express app is running");
 });
+
+// 🔹 Swagger route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use("/api/auth", authRoutes);
