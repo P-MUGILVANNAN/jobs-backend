@@ -27,10 +27,44 @@ const createJob = async (req, res) => {
   }
 };
 
+// 🔹 Get Jobs with Pagination + Filters + Sorting
 const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().populate("createdBy", "name email");
-    res.json(jobs);
+    const {
+      page = 1,
+      limit = 10,
+      jobType,
+      experience,
+      location,
+      sort = "desc"
+    } = req.query;
+
+    const query = {};
+
+    // Apply filters
+    if (jobType) query.jobType = jobType;
+    if (experience) query.experience = experience;
+    if (location) query.location = { $regex: location, $options: "i" };
+
+    // Pagination
+    const skip = (page - 1) * limit;
+
+    // Fetch jobs with filters + pagination + sorting
+    const jobs = await Job.find(query)
+      .populate("createdBy", "name email")
+      .sort({ createdAt: sort === "asc" ? 1 : -1 }) // sort by createdAt
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalJobs = await Job.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      totalJobs,
+      page: Number(page),
+      totalPages: Math.ceil(totalJobs / limit),
+      jobs,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

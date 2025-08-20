@@ -5,7 +5,6 @@ const {
   getUserById,
   deleteUser,
   toggleSuspiciousUser,
-  searchUsers,
 } = require("../controllers/adminController");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
@@ -16,9 +15,6 @@ router.use(adminOnly);
 
 // Get all job seekers
 router.get("/users", getAllUsers);
-
-// Search users by name, email, or skills
-router.get("/users/search", searchUsers);
 
 // Get single job seeker details
 router.get("/users/:id", getUserById);

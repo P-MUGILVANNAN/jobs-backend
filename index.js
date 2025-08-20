@@ -8,6 +8,8 @@ const authRoutes = require('./routes/authRoutes');
 const jobRoutes = require("./routes/jobRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const adminApplicationRoutes = require("./routes/adminApplicationRoutes");
+const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 
 const app = express();
 app.use(cors());
@@ -26,6 +28,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/admin", adminApplicationRoutes);
+app.use("/api/admin", adminDashboardRoutes);
 
 // error handling middleware
 app.use((err, req, res, next) => {

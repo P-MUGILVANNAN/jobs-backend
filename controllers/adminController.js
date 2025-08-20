@@ -1,14 +1,45 @@
 const User = require("../models/User");
 const Job = require("../models/Job");
 
-// 🔹 Get all users with full details
+// 🔹 Get all users with pagination, filter, and search
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" })
-      .select("-password") // exclude password
-      .populate("appliedJobs", "title description location jobType skills createdBy");
+    let { page = 1, limit = 10, role, from, to, search } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
 
-    res.status(200).json({ success: true, users });
+    // Build filter object
+    let filter = { role: "user" };
+
+    if (role) filter.role = role;
+
+    if (from && to) {
+      filter.createdAt = { $gte: new Date(from), $lte: new Date(to) };
+    }
+
+    if (search) {
+      const regex = new RegExp(search, "i");
+      filter.$or = [{ name: regex }, { email: regex }, { skills: regex }];
+    }
+
+    // Count total docs for pagination
+    const totalUsers = await User.countDocuments(filter);
+
+    // Query with pagination
+    const users = await User.find(filter)
+      .select("-password") // exclude password
+      .populate("appliedJobs", "title description location jobType skills createdBy")
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 }); // newest first
+
+    res.status(200).json({
+      success: true,
+      totalUsers,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      users,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -71,29 +102,9 @@ const toggleSuspiciousUser = async (req, res) => {
   }
 };
 
-// 🔹 Search users by name, email, skills
-const searchUsers = async (req, res) => {
-  try {
-    const { query } = req.query;
-    const regex = new RegExp(query, "i"); // case-insensitive
-
-    const users = await User.find({
-      role: "user",
-      $or: [{ name: regex }, { email: regex }, { skills: regex }],
-    })
-      .select("-password")
-      .populate("appliedJobs", "title description location jobType skills createdBy");
-
-    res.status(200).json({ success: true, users });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
 module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
   toggleSuspiciousUser,
-  searchUsers,
 };
