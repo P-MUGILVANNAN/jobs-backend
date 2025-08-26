@@ -2,13 +2,14 @@ const Job = require("../models/Job");
 
 const createJob = async (req, res) => {
   try {
-    const { title, description, skills, location, salary, jobType, experience } = req.body;
+    const { companyName, title, description, skills, location, salary, jobType, experience } = req.body;
 
-    if (!title || !description || !skills || !location || !salary) {
+    if (!companyName || !title || !description || !skills || !location || !salary) {
       return res.status(400).json({ message: "Please provide all required fields" });
     }
 
     const job = await Job.create({
+      companyName,
       title,
       description,
       skills: skills.split(","), // convert CSV string to array
@@ -93,6 +94,7 @@ const updateJob = async (req, res) => {
     }
 
     job.title = req.body.title || job.title;
+    job.companyName = req.body.companyName || job.companyName;
     job.description = req.body.description || job.description;
     job.skills = req.body.skills ? req.body.skills.split(",") : job.skills;
     job.location = req.body.location || job.location;
