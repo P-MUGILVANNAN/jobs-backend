@@ -15,7 +15,9 @@ const userApplicationRoutes = require("./routes/userApplicationRoutes");
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://fiit-jobs-admin.vercel.app'
+}));
 app.use(express.json()); 
 app.use(bodyParser.json());
 
