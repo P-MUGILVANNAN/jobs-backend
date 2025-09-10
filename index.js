@@ -11,6 +11,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const adminApplicationRoutes = require("./routes/adminApplicationRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const { swaggerUi, swaggerSpec } = require("./config/swagger");
+const userApplicationRoutes = require("./routes/userApplicationRoutes");
+
 
 const app = express();
 app.use(cors());
@@ -34,6 +36,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/admin", adminApplicationRoutes);
 app.use("/api/admin", adminDashboardRoutes);
+app.use("/api/user", userApplicationRoutes);
+
 
 // error handling middleware
 app.use((err, req, res, next) => {
