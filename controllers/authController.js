@@ -3,7 +3,6 @@ const admin = require("../config/firebaseAdmin");
 const nodemailer = require("nodemailer");
 const Otp = require("../models/Otp");
 const crypto = require("crypto");
-const bcrypt = require("bcryptjs");
 
 // 🔹 Nodemailer Transporter
 const transporter = nodemailer.createTransport({
@@ -76,15 +75,11 @@ const sendOtp = async (req, res) => {
     // generate 6-digit OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // hash password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // save in DB with expiry (5 minutes)
     await Otp.create({
       name,
       email,
-      password: hashedPassword, // store hashed
+      password,
       otp,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -148,7 +143,7 @@ const verifyOtpAndRegister = async (req, res) => {
     const user = await User.create({
       name: otpRecord.name,
       email: otpRecord.email,
-      password: otpRecord.password, // already hashed
+      password: otpRecord.password,
       role: "user", // default
       provider: "local",
     });
