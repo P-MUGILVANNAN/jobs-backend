@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerUser, loginUser, googleAuth } = require("../controllers/authController");
+const { sendOtp, verifyOtpAndRegister, loginUser, googleAuth } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -46,7 +46,8 @@ const router = express.Router();
  *       400:
  *         description: User already exists
  */
-router.post("/register", registerUser);
+router.post("/send-otp", sendOtp); // Step 1: request OTP
+router.post("/verify-otp", verifyOtpAndRegister); // Step 2: verify OTP & register
 
 /**
  * @swagger
