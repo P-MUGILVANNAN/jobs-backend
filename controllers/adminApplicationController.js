@@ -151,7 +151,7 @@ const notifyApplicant = async (req, res) => {
 
     const application = await Application.findById(appId)
       .populate("applicant", "name email")
-      .populate("job", "title"); // populate job title for email
+      .populate("job", "title location");
 
     if (!application) {
       return res
@@ -163,30 +163,55 @@ const notifyApplicant = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // your email
-        pass: process.env.EMAIL_PASS, // your app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    // HTML email body
+    // ✅ Professional HTML email template
     const htmlBody = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: #4CAF50;">Job Application Update</h2>
-        <p>Hi <strong>${application.applicant.name}</strong>,</p>
-        <p>Your application for the job <strong>"${application.job.title}"</strong> has been updated.</p>
-        <p>Status: <strong style="color: #FF5722;">${application.status.toUpperCase()}</strong></p>
-        <p>Thank you for applying. Stay tuned for further updates.</p>
-        <br>
-        <p>Best regards,</p>
-        <p><strong>Admin Team</strong></p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+      <h2 style="color: #2c3e50; text-align: center;">📢 Application Status Update</h2>
+      
+      <p style="font-size: 16px; color: #333;">Hi <b>${application.applicant.name}</b>,</p>
+      <p style="font-size: 15px; color: #333;">
+        Your application for the role of <strong>${application.job.title}</strong>${
+          application.job.location ? ` in <strong>${application.job.location}</strong>` : ""
+        } has been updated.
+      </p>
+
+      <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin: 20px 0; text-align:center;">
+        <p style="font-size: 15px; margin: 0; color: #444;">
+          📌 <strong>Status:</strong> <span style="color:#FF5722;">${application.status.toUpperCase()}</span>
+        </p>
       </div>
+
+      <p style="font-size: 15px; color: #333;">
+        Thank you for applying with us. Please stay tuned for further updates from our team or the employer.
+      </p>
+
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="https://fiitjobs.com/applications" 
+           style="background: #28a745; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+          View My Applications 📂
+        </a>
+      </div>
+
+      <hr style="margin: 25px 0;" />
+      <p style="font-size: 13px; color: #777; text-align: center;">
+        Need assistance? Reach out to us at 
+        <a href="mailto:support@fiitjobs.com">support@fiitjobs.com</a>
+      </p>
+      <p style="text-align: center; font-size: 12px; color: #aaa;">
+        © ${new Date().getFullYear()} FIIT JOBS. All rights reserved.
+      </p>
+    </div>
     `;
 
-    // Mail options
     const mailOptions = {
-      from: `"Admin Team" <${process.env.EMAIL_USER}>`,
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
       to: application.applicant.email,
-      subject: `Application Status Update: ${application.job.title}`,
+      subject: `📢 Application Status Update - ${application.job.title}`,
       html: htmlBody,
     };
 
@@ -206,8 +231,6 @@ const notifyApplicant = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-module.exports = { notifyApplicant };
 
 module.exports = {
   adminApplyJob,
