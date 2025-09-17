@@ -47,6 +47,7 @@ const getJobs = async (req, res) => {
     const {
       page = 1,
       limit = 10,
+      keyword,
       jobType,
       experience,
       location,
@@ -58,6 +59,14 @@ const getJobs = async (req, res) => {
     const query = {};
 
     // Filters
+    if (keyword) {
+      const regex = new RegExp(keyword, "i"); // 'i' for case-insensitive
+      query.$or = [
+        { title: { $regex: regex } },
+        { description: { $regex: regex } },
+        { companyName: { $regex: regex } },
+      ];
+    }
     if (jobType) query.jobType = jobType;
     if (experience) query.experience = experience;
     if (location) query.location = { $regex: location, $options: "i" };
