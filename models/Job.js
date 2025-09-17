@@ -18,6 +18,26 @@ const jobSchema = new mongoose.Schema(
       type: [String], // array of skills
       required: [true, "Please add required skills"],
     },
+    qualification: {
+      type: String,
+      required: [true, "Please add qualification"],
+    },
+    category: {
+      type: String,
+      enum: [
+        "Networking",
+        "Linux",
+        "AWS",
+        "Accounts",
+        "Developer",
+        "Designer",
+        "DevOps",
+        "Testing",
+        "Data Analyst",
+        "Data Scientist",
+      ],
+      required: [true, "Please add job category"],
+    },
     location: {
       type: String,
       required: [true, "Please add job location"],
@@ -29,7 +49,7 @@ const jobSchema = new mongoose.Schema(
     jobType: {
       type: String,
       enum: ["Full-Time", "Part-Time", "Internship", "Contract"],
-      default: "Full-time",
+      default: "Full-Time",
     },
     experience: {
       type: String,
