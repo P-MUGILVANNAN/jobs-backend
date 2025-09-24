@@ -3,26 +3,23 @@ const admin = require("../config/firebaseAdmin");
 const nodemailer = require("nodemailer");
 const Otp = require("../models/Otp");
 const crypto = require("crypto");
+const Brevo = require("@getbrevo/brevo");
 
-// 🔹 Nodemailer Transporter - Updated for Brevo
-const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
-  port: process.env.BREVO_SMTP_PORT || 2525,
-  secure: false, // Use 'true' for port 465, 'false' for 587 and 2525
-  auth: {
-    user: process.env.BREVO_SMTP_USER,
-    pass: process.env.BREVO_SMTP_KEY,
-  },
-});
+// 🔹 Setup Brevo API client
+const brevoClient = new Brevo.TransactionalEmailsApi();
+brevoClient.setApiKey(
+  Brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY   // 👉 use Brevo API key, not SMTP key
+);
 
 // 🔹 Send Welcome Email
 const sendWelcomeEmail = async (email, name) => {
   try {
-    await transporter.sendMail({
-      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`, // Use your Brevo sender email
-      to: email,
+    const emailData = {
+      sender: { name: "FIIT JOBS", email: process.env.EMAIL_USER },
+      to: [{ email, name }],
       subject: "🎉 Welcome to FIIT JOBS - Let’s Get Started!",
-      html: `
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
           <h2 style="color: #2c3e50; text-align: center;">Welcome to FIIT JOBS 🎉</h2>
           <p style="font-size: 16px; color: #333;">Hi <b>${name}</b>,</p>
@@ -56,7 +53,8 @@ const sendWelcomeEmail = async (email, name) => {
           </p>
         </div>
       `,
-    });
+    };
+    await brevoClient.sendTransacEmail(emailData);
     console.log(`Welcome email sent to ${email}`);
   } catch (error) {
     console.error("Error sending email:", error.message);
@@ -87,11 +85,11 @@ const sendOtp = async (req, res) => {
     });
 
     // send email
-    await transporter.sendMail({
-      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
-      to: email,
+    const emailData = {
+      sender: { name: "FIIT JOBS", email: process.env.EMAIL_USER },
+      to: [{ email, name }],
       subject: "🔐 Verify Your Email - FIIT JOBS",
-      html: `
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
           <h2 style="color: #2c3e50; text-align: center;">Welcome to FIIT JOBS 🎉</h2>
           <p style="font-size: 16px; color: #333;">Hi <b>${name}</b>,</p>
@@ -117,7 +115,9 @@ const sendOtp = async (req, res) => {
           <p style="text-align: center; font-size: 12px; color: #aaa;">© ${new Date().getFullYear()} FIIT JOBS. All rights reserved.</p>
         </div>
       `,
-    });
+    };
+
+    await brevoClient.sendTransacEmail(emailData);
 
     res.json({ message: "OTP sent successfully to email" });
   } catch (error) {
