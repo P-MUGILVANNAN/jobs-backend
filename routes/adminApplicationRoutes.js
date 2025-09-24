@@ -5,7 +5,6 @@ const {
   getApplicationsByJob,
   getAllApplications,
   updateApplicationStatus,
-  notifyApplicant,
 } = require("../controllers/adminApplicationController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
@@ -133,37 +132,5 @@ router.get("/applications", protect, adminOnly, getAllApplications);
  *         description: Unauthorized
  */
 router.patch("/applications/:appId", protect, adminOnly, updateApplicationStatus);
-
-/**
- * @swagger
- * /admin/applications/{appId}/notify:
- *   post:
- *     summary: Notify applicant via email/notification (Admin only)
- *     tags: [Admin Applications]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: appId
- *         schema:
- *           type: string
- *         required: true
- *         description: Application ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *     responses:
- *       200:
- *         description: Notification sent successfully
- *       401:
- *         description: Unauthorized
- */
-router.post("/applications/:appId/notify", protect, adminOnly, notifyApplicant);
 
 module.exports = router;
