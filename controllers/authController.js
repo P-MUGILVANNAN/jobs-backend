@@ -7,8 +7,8 @@ const crypto = require("crypto");
 // 🔹 Nodemailer Transporter - Updated for Brevo
 const transporter = nodemailer.createTransport({
   host: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
-  port: process.env.BREVO_SMTP_PORT || 587,
-  secure: false, // Use 'true' for port 465, 'false' for 587 and 2525
+  port: process.env.BREVO_SMTP_PORT || 465,
+  secure: true, // Use 'true' for port 465, 'false' for 587 and 2525
   auth: {
     user: process.env.BREVO_SMTP_USER,
     pass: process.env.BREVO_SMTP_KEY,
