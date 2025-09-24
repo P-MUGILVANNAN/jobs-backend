@@ -4,12 +4,14 @@ const nodemailer = require("nodemailer");
 const Otp = require("../models/Otp");
 const crypto = require("crypto");
 
-// 🔹 Nodemailer Transporter
+// 🔹 Nodemailer Transporter - Updated for Brevo
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
+  port: process.env.BREVO_SMTP_PORT || 587,
+  secure: false, // Use 'true' for port 465, 'false' for 587 and 2525
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_KEY,
   },
 });
 
@@ -17,7 +19,7 @@ const transporter = nodemailer.createTransport({
 const sendWelcomeEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`, // Use your Brevo sender email
       to: email,
       subject: "🎉 Welcome to FIIT JOBS - Let’s Get Started!",
       html: `
