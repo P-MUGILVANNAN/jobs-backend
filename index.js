@@ -18,7 +18,7 @@ const app = express();
 app.use(cors({
   origin: [
     'https://fiit-jobs-admin.vercel.app',
-    'http://localhost:5173'
+    'https://fiitjobs.vercel.app'
   ]
 }));
 app.use(express.json()); 
