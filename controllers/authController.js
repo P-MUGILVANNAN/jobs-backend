@@ -6,12 +6,10 @@ const crypto = require("crypto");
 
 // 🔹 Nodemailer Transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp.resend.com", // ✅ Resend SMTP host
-  secure: true, // ✅ Use SSL
-  port: 465, // ✅ Standard port for SSL
+  service: "gmail",
   auth: {
-    user: "resend", // ✅ This is always "resend"
-    pass: process.env.RESEND_API_KEY, // ✅ Use your Resend API key
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -19,7 +17,7 @@ const transporter = nodemailer.createTransport({
 const sendWelcomeEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"FIIT JOBS" <${process.env.RESEND_FROM_EMAIL}>`, // Use a verified domain email from Resend
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "🎉 Welcome to FIIT JOBS - Let’s Get Started!",
       html: `
@@ -32,7 +30,7 @@ const sendWelcomeEmail = async (email, name) => {
 
           <div style="text-align: center; margin: 25px 0;">
             <a href="https://fiitjobs.com/login" 
-              style="background: #28a745; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+               style="background: #28a745; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
               Explore Jobs 🚀
             </a>
           </div>
@@ -88,7 +86,7 @@ const sendOtp = async (req, res) => {
 
     // send email
     await transporter.sendMail({
-      from: `"FIIT JOBS" <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "🔐 Verify Your Email - FIIT JOBS",
       html: `

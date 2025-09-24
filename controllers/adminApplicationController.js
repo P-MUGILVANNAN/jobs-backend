@@ -146,98 +146,96 @@ const updateApplicationStatus = async (req, res) => {
 };
 
 const notifyApplicant = async (req, res) => {
-  try {
-    const { appId } = req.params;
+  try {
+    const { appId } = req.params;
 
-    const application = await Application.findById(appId)
-      .populate("applicant", "name email")
-      .populate("job", "title location");
+    const application = await Application.findById(appId)
+      .populate("applicant", "name email")
+      .populate("job", "title location");
 
-    if (!application) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Application not found" });
-    }
+    if (!application) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Application not found" });
+    }
 
-    // ✅ Updated Nodemailer transporter to use Resend
-    const transporter = nodemailer.createTransport({
-      host: "smtp.resend.com", // Resend SMTP host
-      secure: true, // Use SSL
-      port: 465, // Standard port for SSL
-      auth: {
-        user: "resend", // This is always "resend" for SMTP connections
-        pass: process.env.RESEND_API_KEY, // Your Resend API key
-      },
-    });
+    // Create transporter (example using Gmail)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    // ✅ Professional HTML email template
-    const htmlBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
-      <h2 style="color: #2c3e50; text-align: center;">📢 Application Status Update</h2>
-      
-      <p style="font-size: 16px; color: #333;">Hi <b>${application.applicant.name}</b>,</p>
-      <p style="font-size: 15px; color: #333;">
-        Your application for the role of <strong>${application.job.title}</strong>${
-          application.job.location ? ` in <strong>${application.job.location}</strong>` : ""
-        } has been updated.
-      </p>
+    // ✅ Professional HTML email template
+    const htmlBody = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+      <h2 style="color: #2c3e50; text-align: center;">📢 Application Status Update</h2>
+      
+      <p style="font-size: 16px; color: #333;">Hi <b>${application.applicant.name}</b>,</p>
+      <p style="font-size: 15px; color: #333;">
+        Your application for the role of <strong>${application.job.title}</strong>${
+          application.job.location ? ` in <strong>${application.job.location}</strong>` : ""
+        } has been updated.
+      </p>
 
-      <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin: 20px 0; text-align:center;">
-        <p style="font-size: 15px; margin: 0; color: #444;">
-          📌 <strong>Status:</strong> <span style="color:#FF5722;">${application.status.toUpperCase()}</span>
-        </p>
-      </div>
+      <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin: 20px 0; text-align:center;">
+        <p style="font-size: 15px; margin: 0; color: #444;">
+          📌 <strong>Status:</strong> <span style="color:#FF5722;">${application.status.toUpperCase()}</span>
+        </p>
+      </div>
 
-      <p style="font-size: 15px; color: #333;">
-        Thank you for applying with us. Please stay tuned for further updates from our team or the employer.
-      </p>
+      <p style="font-size: 15px; color: #333;">
+        Thank you for applying with us. Please stay tuned for further updates from our team or the employer.
+      </p>
 
-      <div style="text-align: center; margin: 25px 0;">
-        <a href="https://fiitjobs.com/applications" 
-           style="background: #28a745; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
-          View My Applications 📂
-        </a>
-      </div>
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="https://fiitjobs.com/applications" 
+           style="background: #28a745; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+          View My Applications 📂
+        </a>
+      </div>
 
-      <hr style="margin: 25px 0;" />
-      <p style="font-size: 13px; color: #777; text-align: center;">
-        Need assistance? Reach out to us at 
-        <a href="mailto:support@fiitjobs.com">support@fiitjobs.com</a>
-      </p>
-      <p style="text-align: center; font-size: 12px; color: #aaa;">
-        © ${new Date().getFullYear()} FIIT JOBS. All rights reserved.
-      </p>
-    </div>
-    `;
+      <hr style="margin: 25px 0;" />
+      <p style="font-size: 13px; color: #777; text-align: center;">
+        Need assistance? Reach out to us at 
+        <a href="mailto:support@fiitjobs.com">support@fiitjobs.com</a>
+      </p>
+      <p style="text-align: center; font-size: 12px; color: #aaa;">
+        © ${new Date().getFullYear()} FIIT JOBS. All rights reserved.
+      </p>
+    </div>
+    `;
 
-    const mailOptions = {
-      from: `"FIIT JOBS" <${process.env.RESEND_FROM_EMAIL}>`, // The 'from' email must be a verified domain in Resend
-      to: application.applicant.email,
-      subject: `📢 Application Status Update - ${application.job.title}`,
-      html: htmlBody,
-    };
+    const mailOptions = {
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
+      to: application.applicant.email,
+      subject: `📢 Application Status Update - ${application.job.title}`,
+      html: htmlBody,
+    };
 
-    // Send email
-    await transporter.sendMail(mailOptions);
+    // Send email
+    await transporter.sendMail(mailOptions);
 
-    // Mark as notified
-    application.notified = true;
-    await application.save();
+    // Mark as notified
+    application.notified = true;
+    await application.save();
 
-    res.status(200).json({
-      success: true,
-      message: `Notification email sent to ${application.applicant.email}`,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
+    res.status(200).json({
+      success: true,
+      message: `Notification email sent to ${application.applicant.email}`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
 
 module.exports = {
-  adminApplyJob,
-  getApplicationsByJob,
-  getAllApplications,
-  updateApplicationStatus,
-  notifyApplicant,
+  adminApplyJob,
+  getApplicationsByJob,
+  getAllApplications,
+  updateApplicationStatus,
+  notifyApplicant,
 };
