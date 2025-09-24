@@ -1,16 +1,13 @@
 const Application = require("../models/Application");
 const Job = require("../models/Job");
 const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
-dotenv.config();
 
-// 🔹 Nodemailer transporter with SendGrid
+// Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
+  service: "gmail", // or "hotmail", "yahoo", etc. based on your EMAIL_USER
   auth: {
-    user: "apikey", // this is literal string "apikey"
-    pass: process.env.SENDGRID_API_KEY, // your actual SendGrid API key
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -40,51 +37,52 @@ const applyForJob = async (req, res) => {
       applicant: userId,
     });
 
-    // Send confirmation email via SendGrid
+    // Send confirmation email
     const mailOptions = {
-      from: `"FIIT JOBS" <${process.env.FROM_EMAIL}>`, // Set this in your .env
+      from: `"FIIT JOBS" <${process.env.EMAIL_USER}>`,
       to: userEmail, // applicant's email
       subject: `📩 Application Submitted - ${job.title} at ${job.location}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
-          <h2 style="color: #2c3e50; text-align: center;">Application Submitted ✅</h2>
-          
-          <p style="font-size: 16px; color: #333;">Hi <b>${req.user.name}</b>,</p>
-          <p style="font-size: 15px; color: #333;">
-            Thank you for applying for the role of <strong>${job.title}</strong> in <strong>${job.location}</strong>.
-          </p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+      <h2 style="color: #2c3e50; text-align: center;">Application Submitted ✅</h2>
+      
+      <p style="font-size: 16px; color: #333;">Hi <b>${req.user.name}</b>,</p>
+      <p style="font-size: 15px; color: #333;">
+        Thank you for applying for the role of <strong>${job.title}</strong> in <strong>${job.location}</strong>.
+      </p>
 
-          <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="font-size: 15px; margin: 0; color: #444;">
-              📌 <strong>Job Title:</strong> ${job.title}<br/>
-              📍 <strong>Location:</strong> ${job.location}
-            </p>
-          </div>
+      <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
+        <p style="font-size: 15px; margin: 0; color: #444;">
+          📌 <strong>Job Title:</strong> ${job.title}<br/>
+          📍 <strong>Location:</strong> ${job.location}
+        </p>
+      </div>
 
-          <p style="font-size: 15px; color: #333;">
-            We have successfully received your application. Our team (or the employer) will review your profile and get back to you soon.
-          </p>
+      <p style="font-size: 15px; color: #333;">
+        We have successfully received your application. Our team (or the employer) will review your profile and get back to you soon.
+      </p>
 
-          <div style="text-align: center; margin: 25px 0;">
-            <a href="https://fiitjobs.com/applications" 
-               style="background: #007bff; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
-              View My Applications 🔎
-            </a>
-          </div>
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="https://fiitjobs.com/applications" 
+           style="background: #007bff; color: white; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+          View My Applications 🔎
+        </a>
+      </div>
 
-          <hr style="margin: 25px 0;" />
-          <p style="font-size: 13px; color: #777; text-align: center;">
-            Need assistance? Reach out to us at 
-            <a href="mailto:support@fiitjobs.com">support@fiitjobs.com</a>
-          </p>
-          <p style="text-align: center; font-size: 12px; color: #aaa;">
-            © ${new Date().getFullYear()} FIIT JOBS. All rights reserved.
-          </p>
-        </div>
-      `,
+      <hr style="margin: 25px 0;" />
+      <p style="font-size: 13px; color: #777; text-align: center;">
+        Need assistance? Reach out to us at 
+        <a href="mailto:support@fiitjobs.com">support@fiitjobs.com</a>
+      </p>
+      <p style="text-align: center; font-size: 12px; color: #aaa;">
+        © ${new Date().getFullYear()} FIIT JOBS. All rights reserved.
+      </p>
+    </div>
+  `,
     };
 
     await transporter.sendMail(mailOptions);
+
 
     res.status(201).json({
       success: true,
