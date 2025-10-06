@@ -74,7 +74,7 @@ const getAllApplications = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const applications = await Application.find(query)
-      .populate("applicant", "name email phone location resume")
+      .populate("applicant", "name email phone experience location resume")
       .populate("job", "title location")
       .sort({ appliedAt: sort === "asc" ? 1 : -1 })
       .skip(skip)
