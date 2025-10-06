@@ -50,6 +50,22 @@ const userSchema = new mongoose.Schema(
       type: String, // Google/local profile picture
     },
 
+    // 🔹 Category (extended field)
+    category: {
+      type: String,
+      enum: [
+        "jobseeker",
+        "fresher",
+        "housewife",
+        "student",
+        "experienced",
+        "freelancer",
+        "career break",
+        "others",
+      ],
+      default: "jobseeker",
+    },
+
     // 🔹 Extended Profile Section
     profileImage: {
       type: String, // custom profile image

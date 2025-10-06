@@ -1,10 +1,10 @@
 const User = require("../models/User");
 const Job = require("../models/Job");
 
-// 🔹 Get all users with pagination, filter, and search
+// 🔹 Get all users with pagination, filter, search, and category filter
 const getAllUsers = async (req, res) => {
   try {
-    let { page = 1, limit = 10, role, from, to, search } = req.query;
+    let { page = 1, limit = 10, role, from, to, search, category } = req.query;
     page = parseInt(page);
     limit = parseInt(limit);
 
@@ -13,10 +13,17 @@ const getAllUsers = async (req, res) => {
 
     if (role) filter.role = role;
 
+    // 🔹 Filter by category (optional)
+    if (category) {
+      filter.category = category;
+    }
+
+    // 🔹 Date filter (from - to)
     if (from && to) {
       filter.createdAt = { $gte: new Date(from), $lte: new Date(to) };
     }
 
+    // 🔹 Search by name, email, or skills
     if (search) {
       const regex = new RegExp(search, "i");
       filter.$or = [{ name: regex }, { email: regex }, { skills: regex }];
@@ -50,7 +57,7 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id)
-      .select("-password") // exclude password
+      .select("-password")
       .populate("appliedJobs", "title description location jobType skills createdBy");
 
     if (!user || user.role !== "user") {
