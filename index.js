@@ -25,6 +25,9 @@ app.use(cors({
 app.use(express.json()); 
 app.use(bodyParser.json());
 
+// resume
+app.use('/resumes', express.static(path.join(__dirname, 'resumes')));
+
 // use db
 connectDb();
 
