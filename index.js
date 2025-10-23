@@ -1,4 +1,6 @@
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require('cors');
 const bodyParser = require("body-parser");
 const dotenv = require('dotenv');
@@ -13,6 +15,7 @@ const adminApplicationRoutes = require("./routes/adminApplicationRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const { swaggerUi, swaggerSpec } = require("./config/swagger");
 const userApplicationRoutes = require("./routes/userApplicationRoutes");
+const mockTestHandler = require("./socketHandlers/mockTestHandler");
 
 
 const app = express();
@@ -31,6 +34,19 @@ app.use('/resumes', express.static(path.join(__dirname, 'resumes')));
 
 // use db
 connectDb();
+
+// Create HTTP + Socket Server
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173","https://fiitjobs.vercel.app"], // React app origin
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+});
+
+// Register socket handler
+mockTestHandler(io);
 
 app.get("/",(req,res)=>{
     res.send("Express app is running");
@@ -56,6 +72,6 @@ app.use((err, req, res, next) => {
 });
 
 
-app.listen(process.env.PORT,()=>{
+server.listen(process.env.PORT,()=>{
     console.log("Server is listening on "+process.env.PORT);
 })
